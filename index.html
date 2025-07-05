@@ -39,8 +39,8 @@
             left: 0;
             top: 0;
             height: 100%;
-            background: linear-gradient(135deg, #ffd60a 0%, #ffb700 100%);
-            color: #000814;
+            background: #000000;
+            color: #ffffff;
             display: flex;
             align-items: center;
             padding: 0 20px;
@@ -50,6 +50,16 @@
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
             min-width: 200px;
             animation: headerPulse 4s ease-in-out infinite;
+        }
+
+        .live-sports-text {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .brand-text {
+            color: #ffffff;
+            font-weight: bold;
         }
 
         @keyframes headerPulse {
@@ -274,7 +284,7 @@
 <body>
     <div class="ticker-container" id="tickerContainer">
         <div class="ticker-header">
-            <div id="headerText">🏀 LIVE SPORTS • The Bench Warmers</div>
+            <div id="headerText"><span class="live-sports-text">LIVE SPORTS</span> • <span class="brand-text">The Bench Warmers</span></div>
         </div>
         <div class="ticker-content" id="tickerContent">
             <!-- Content will be populated by JavaScript -->
@@ -332,7 +342,7 @@
 
             setHolidayMode() {
                 this.tickerContainer.classList.add('holiday-mode');
-                this.headerText.innerHTML = '🎉 HOLIDAY MODE • The Bench Warmers';
+                this.headerText.innerHTML = '<span class="live-sports-text">HOLIDAY MODE</span> • <span class="brand-text">The Bench Warmers</span>';
                 
                 const holidayContent = [
                     { type: 'news', content: 'Happy Holidays from The Bench Warmers!' },
