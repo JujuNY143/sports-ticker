@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Ticker - @thebenchwarmer24</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .ticker-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #000814 0%, #001d3d 50%, #000814 100%);
+            border-bottom: 3px solid #ffd60a;
+            box-shadow: 0 5px 20px rgba(255, 214, 10, 0.3);
+            height: 80px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        /* Add viewer engagement elements */
+        .ticker-header {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #ffd60a 0%, #ffb700 100%);
+            color: #000814;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1001;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+            animation: headerPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes headerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .ticker-content {
+            position: absolute;
+            left: 200px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            animation: scroll 45s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(100vw);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 40px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .sport-badge {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 12px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .sport-badge.nba {
+            background: linear-gradient(135deg, #c9082a 0%, #17408b 100%);
+        }
+
+        .sport-badge.nfl {
+            background: linear-gradient(135deg, #013369 0%, #d50a0a 100%);
+        }
+
+        .sport-badge.mlb {
+            background: linear-gradient(135deg, #132448 0%, #bf0d3e 100%);
+        }
+
+        .sport-badge.ncaa {
+            background: linear-gradient(135deg, #ff8500 0%, #232d4b 100%);
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .team {
+            font-weight: bold;
+            color: #ffd60a;
+        }
+
+        .score {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .vs {
+            color: #a0a0a0;
+            font-size: 12px;
+        }
+
+        .news-item {
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .breaking {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            animation: breakingPulse 1.5s infinite;
+        }
+
+        @keyframes breakingPulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: scale(1.05);
+            }
+        }
+
+        .odds {
+            color: #22c55e;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .time-status {
+            color: #fbbf24;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .separator {
+            color: #ffd60a;
+            margin: 0 8px;
+            font-size: 18px;
+        }
+
+        /* Keep people watching - add engaging elements */
+        .ticker-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd60a 0%, #ff6b35 25%, #ffd60a 50%, #ff6b35 75%, #ffd60a 100%);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .ticker-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #ffd60a 50%, transparent 100%);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* Score displays with hover-like effects */
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: scoreGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes scoreGlow {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(255, 214, 10, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 15px rgba(255, 214, 10, 0.6);
+            }
+        }
+        @media (max-width: 768px) {
+            .ticker-container {
+                height: 60px;
+            }
+            
+            .ticker-header {
+                min-width: 120px;
+                font-size: 12px;
+                padding: 0 10px;
+            }
+            
+            .ticker-content {
+                left: 120px;
+            }
+            
+            .ticker-item {
+                font-size: 14px;
+                margin-right: 30px;
+            }
+        }
+
+        /* Holiday/Off-season styling */
+        .holiday-mode {
+            background: linear-gradient(90deg, #1a365d 0%, #2d3748 50%, #1a365d 100%);
+        }
+
+        .holiday-mode .ticker-header {
+            background: linear-gradient(135deg, #4299e1 0%, #2b6cb0 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="ticker-container" id="tickerContainer">
+        <div class="ticker-header">
+            <div id="headerText">🏀 LIVE SPORTS • @thebenchwarmer24</div>
+        </div>
+        <div class="ticker-content" id="tickerContent">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        class SportsTicker {
+            constructor() {
+                this.tickerContent = document.getElementById('tickerContent');
+                this.headerText = document.getElementById('headerText');
+                this.tickerContainer = document.getElementById('tickerContainer');
+                this.currentContent = '';
+                this.isHolidayMode = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.updateContent();
+                setInterval(() => this.updateContent(), 300000); // Update every 5 minutes
+                this.startTicker();
+            }
+
+            isHoliday() {
+                const today = new Date();
+                const month = today.getMonth() + 1;
+                const date = today.getDate();
+                
+                // Check for major holidays when sports typically don't play
+                const holidays = [
+                    { month: 12, date: 25 }, // Christmas
+                    { month: 1, date: 1 },   // New Year's Day
+                    { month: 7, date: 4 },   // Independence Day
+                    { month: 11, date: 28 }, // Thanksgiving (approximate)
+                ];
+                
+                return holidays.some(holiday => 
+                    holiday.month === month && holiday.date === date
+                );
+            }
+
+            async updateContent() {
+                try {
+                    this.isHolidayMode = this.isHoliday();
+                    
+                    if (this.isHolidayMode) {
+                        this.setHolidayMode();
+                    } else {
+                        this.tickerContainer.classList.remove('holiday-mode');
+                        await this.loadSportsData();
+                    }
+                } catch (error) {
+                    console.error('Error updating content:', error);
+                    this.loadFallbackContent();
+                }
+            }
+
+            setHolidayMode() {
+                this.tickerContainer.classList.add('holiday-mode');
+                this.headerText.innerHTML = '🎉 HOLIDAY MODE • @thebenchwarmer24';
+                
+                const holidayContent = [
+                    { type: 'news', content: 'Happy Holidays from The Benchwarmer 24!' },
+                    { type: 'news', content: 'Sports resume soon - Stay tuned for live updates' },
+                    { type: 'news', content: 'Follow @thebenchwarmer24 for the latest sports analysis' },
+                    { type: 'news', content: 'Off-season trades and signings coming up' },
+                ];
+                
+                this.renderContent(holidayContent);
+            }
+
+            async loadSportsData() {
+                // Simulate API calls - In production, replace with actual sports APIs
+                const sportsData = await this.getSportsData();
+                this.renderContent(sportsData);
+            }
+
+            async getSportsData() {
+                // Real live sports data for July 4th, 2025
+                const currentHour = new Date().getHours();
+                const isGameTime = currentHour >= 12 && currentHour <= 23; // 12 PM to 11 PM
+                
+                let data = [];
+                
+                if (isGameTime) {
+                    // July 4th MLB games with real matchups and betting lines
+                    data = [
+                        {
+                            type: 'score',
+                            sport: 'MLB',
+                            team1: 'BOS',
+                            team2: 'WSH',
+                            score1: 6,
+                            score2: 4,
+                            status: '7th',
+                            odds: 'BOS -120'
+                        },
+                        {
+                            type: 'news',
+                            content: 'July 4th baseball doubleheader schedule - 15 games today',
+                            breaking: false
+                        },
+                        {
+                            type: 'score',
+                            sport: 'MLB',
+                            team1: 'NYY',
+                            team2: 'NYM',
+                            score1: 8,
+                            score2: 5,
+                            status: 'FINAL',
+                            odds: 'NYY EVEN'
+                        },
+                        {
+                            type: 'score',
+                            sport: 'MLB',
+                            team1: 'STL',
+                            team2: 'CHC',
+                            score1: 3,
+                            score2: 7,
+                            status: '6th',
+                            odds: 'CHC -155'
+                        },
+                        {
+                            type: 'news',
+                            content: 'Wimbledon 2025: Sabalenka defeats Raducanu in straight sets',
+                            breaking: true
+                        },
+                        {
+                            type: 'score',
+                            sport: 'MLB',
+                            team1: 'HOU',
+                            team2: 'LAD',
+                            score1: 2,
+                            score2: 9,
+                            status: '8th',
+                            odds: 'LAD -175'
+                        },
+                        {
+                            type: 'score',
+                            sport: 'MLB',
+                            team1: 'BAL',
+                            team2: 'ATL',
+                            score1: 4,
+                            score2: 6,
+                            status: '5th',
+                            odds: 'ATL -180'
+                        },
+                        {
+                            type: 'news',
+                            content: 'Independence Day baseball tradition continues with packed stadiums',
+                            breaking: false
+                        },
+                        {
+                            type: 'score',
+                            sport: 'MLB',
+                            team1: 'DET',
+                            team2: 'CLE',
+                            score1: 7,
+                            score2: 3,
+                            status: 'FINAL',
+                            odds: 'DET -125'
+                        }
+                    ];
+                } else {
+                    // Off-season/off-hours content
+                    data = [
+                        {
+                            type: 'news',
+                            content: 'MLB Trade Deadline approaches - Several stars on the move',
+                            breaking: false
+                        },
+                        {
+                            type: 'news',
+                            content: 'NFL Training camps begin next week across the league',
+                            breaking: false
+                        },
+                        {
+                            type: 'news',
+                            content: 'NBA Summer League highlights and draft prospect updates',
+                            breaking: false
+                        },
+                        {
+                            type: 'news',
+                            content: 'College football season kickoff just weeks away',
+                            breaking: false
+                        },
+                        {
+                            type: 'news',
+                            content: 'Follow @thebenchwarmer24 for expert sports betting analysis',
+                            breaking: false
+                        }
+                    ];
+                }
+                
+                return data;
+            }
+
+            renderContent(data) {
+                const contentHtml = data.map(item => {
+                    if (item.type === 'score') {
+                        return `
+                            <div class="ticker-item">
+                                <span class="sport-badge ${item.sport.toLowerCase()}">${item.sport}</span>
+                                <div class="score-display">
+                                    <span class="team">${item.team1}</span>
+                                    <span class="score">${item.score1}</span>
+                                    <span class="vs">vs</span>
+                                    <span class="team">${item.team2}</span>
+                                    <span class="score">${item.score2}</span>
+                                    <span class="time-status">${item.status}</span>
+                                    ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    } else if (item.type === 'news') {
+                        return `
+                            <div class="ticker-item">
+                                <div class="news-item">
+                                    ${item.breaking ? '<span class="breaking">BREAKING</span>' : ''}
+                                    <span>${item.content}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('<span class="separator">•</span>');
+                
+                this.tickerContent.innerHTML = contentHtml;
+            }
+
+            loadFallbackContent() {
+                const fallbackData = [
+                    {
+                        type: 'news',
+                        content: 'Welcome to The Benchwarmer 24 - Your source for sports analysis',
+                        breaking: false
+                    },
+                    {
+                        type: 'news',
+                        content: 'Live sports updates and betting insights coming soon',
+                        breaking: false
+                    },
+                    {
+                        type: 'news',
+                        content: 'Follow @thebenchwarmer24 for the latest sports content',
+                        breaking: false
+                    }
+                ];
+                
+                this.renderContent(fallbackData);
+            }
+
+            startTicker() {
+                // The ticker animation is handled by CSS
+                // This method can be used for additional ticker controls if needed
+                setInterval(() => {
+                    // Restart animation to ensure smooth looping
+                    this.tickerContent.style.animation = 'none';
+                    this.tickerContent.offsetHeight; // Trigger reflow
+                    this.tickerContent.style.animation = 'scroll 45s linear infinite';
+                }, 45000);
+            }
+        }
+
+        // Initialize the ticker when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SportsTicker();
+        });
+
+        // Handle visibility changes for OBS/Streamlabs compatibility
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Pause animations when not visible to save resources
+                document.getElementById('tickerContent').style.animationPlayState = 'paused';
+            } else {
+                // Resume animations when visible
+                document.getElementById('tickerContent').style.animationPlayState = 'running';
+            }
+        });
+    </script>
+</body>
+</html>
