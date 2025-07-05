@@ -12,10 +12,12 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: transparent;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
         .ticker-container {
@@ -317,14 +319,11 @@
 
             async updateContent() {
                 try {
-                    this.isHolidayMode = this.isHoliday();
-                    
-                    if (this.isHolidayMode) {
-                        this.setHolidayMode();
-                    } else {
-                        this.tickerContainer.classList.remove('holiday-mode');
-                        await this.loadSportsData();
-                    }
+                    // Force display of live scores immediately
+                    console.log('Updating ticker content...');
+                    const sportsData = await this.getSportsData();
+                    console.log('Sports data loaded:', sportsData);
+                    this.renderContent(sportsData);
                 } catch (error) {
                     console.error('Error updating content:', error);
                     this.loadFallbackContent();
@@ -453,6 +452,7 @@
             }
 
             renderContent(data) {
+                console.log('Rendering content:', data);
                 const contentHtml = data.map(item => {
                     if (item.type === 'score') {
                         return `
@@ -482,6 +482,7 @@
                     return '';
                 }).join('<span class="separator">•</span>');
                 
+                console.log('Generated HTML:', contentHtml);
                 this.tickerContent.innerHTML = contentHtml;
             }
 
