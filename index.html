@@ -28,12 +28,11 @@
             background: linear-gradient(90deg, #000814 0%, #001d3d 50%, #000814 100%);
             border-bottom: 3px solid #ffd60a;
             box-shadow: 0 5px 20px rgba(255, 214, 10, 0.3);
-            height: 80px;
+            height: 100px;
             overflow: hidden;
             z-index: 1000;
         }
 
-        /* Add viewer engagement elements */
         .ticker-header {
             position: absolute;
             left: 0;
@@ -43,12 +42,12 @@
             color: #ffffff;
             display: flex;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 25px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 18px;
             z-index: 1001;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-            min-width: 200px;
+            min-width: 250px;
             animation: headerPulse 4s ease-in-out infinite;
         }
 
@@ -69,12 +68,12 @@
 
         .ticker-content {
             position: absolute;
-            left: 200px;
+            left: 250px;
             top: 0;
             height: 100%;
             display: flex;
             align-items: center;
-            animation: scroll 60s linear infinite;
+            animation: scroll 75s linear infinite;
             white-space: nowrap;
         }
 
@@ -90,20 +89,20 @@
         .ticker-item {
             display: inline-flex;
             align-items: center;
-            margin-right: 40px;
+            margin-right: 50px;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 500;
         }
 
         .sport-badge {
             background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
             color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
             font-weight: bold;
-            margin-right: 12px;
+            margin-right: 15px;
             text-transform: uppercase;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
@@ -122,6 +121,10 @@
 
         .sport-badge.ncaa {
             background: linear-gradient(135deg, #ff8500 0%, #232d4b 100%);
+        }
+
+        .sport-badge.mls {
+            background: linear-gradient(135deg, #005DAA 0%, #FF6900 100%);
         }
 
         .score-display {
@@ -160,9 +163,9 @@
         .breaking {
             background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
             color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 12px;
             font-weight: bold;
             animation: breakingPulse 1.5s infinite;
         }
@@ -186,14 +189,14 @@
 
         .time-status {
             color: #fbbf24;
-            font-size: 12px;
+            font-size: 16px;
             margin-left: 8px;
         }
 
         .separator {
             color: #ffd60a;
-            margin: 0 8px;
-            font-size: 18px;
+            margin: 0 12px;
+            font-size: 22px;
         }
 
         /* Keep people watching - add engaging elements */
@@ -233,10 +236,10 @@
         .score-display {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 6px 12px;
-            border-radius: 15px;
+            padding: 8px 16px;
+            border-radius: 18px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             animation: scoreGlow 6s ease-in-out infinite;
@@ -361,10 +364,10 @@
             }
 
             async getSportsData() {
-                // Force live game display with actual current scores
+                // Force live game display with actual current scores and upcoming games
                 const currentHour = new Date().getHours();
                 
-                // Always show live scores during July 4th (major baseball day)
+                // Always show live scores and upcoming games for July 4th (major sports day)
                 let data = [
                     {
                         type: 'score',
@@ -377,19 +380,53 @@
                         odds: 'NYY -165'
                     },
                     {
+                        type: 'upcoming',
+                        sport: 'MLS',
+                        team1: 'LAFC',
+                        team2: 'LAG',
+                        startTime: '10:30 PM ET',
+                        odds: 'LAFC -130'
+                    },
+                    {
+                        type: 'upcoming',
+                        sport: 'MLB',
+                        team1: 'MIN',
+                        team2: 'BOS',
+                        startTime: '4:10 PM ET',
+                        odds: 'BOS -140'
+                    },
+                    {
+                        type: 'score',
+                        sport: 'MLS',
+                        team1: 'ATL',
+                        team2: 'MIA',
+                        score1: 2,
+                        score2: 1,
+                        status: '78th',
+                        odds: 'ATL -115'
+                    },
+                    {
                         type: 'news',
                         content: 'Yankees dominate Rays 7-3 in July 4th matchup',
                         breaking: true
                     },
                     {
-                        type: 'score',
+                        type: 'upcoming',
                         sport: 'MLB',
-                        team1: 'MIN',
-                        team2: 'TB',
-                        score1: 4,
+                        team1: 'KC',
+                        team2: 'BAL',
+                        startTime: '7:15 PM ET',
+                        odds: 'BAL -135'
+                    },
+                    {
+                        type: 'score',
+                        sport: 'MLS',
+                        team1: 'SEA',
+                        team2: 'POR',
+                        score1: 1,
                         score2: 3,
                         status: 'FINAL',
-                        odds: 'MIN +120'
+                        odds: 'POR +140'
                     },
                     {
                         type: 'score',
@@ -402,34 +439,43 @@
                         odds: 'HOU -180'
                     },
                     {
-                        type: 'news',
-                        content: 'Harrison Bader walk-off homer lifts Twins over Rays',
-                        breaking: false
+                        type: 'upcoming',
+                        sport: 'MLS',
+                        team1: 'NYC',
+                        team2: 'PHI',
+                        startTime: '7:30 PM ET',
+                        odds: 'NYC -105'
                     },
                     {
-                        type: 'score',
+                        type: 'upcoming',
                         sport: 'MLB',
                         team1: 'LAD',
                         team2: 'ATL',
-                        score1: 6,
-                        score2: 4,
-                        status: '8th',
+                        startTime: '7:15 PM ET',
                         odds: 'LAD -155'
                     },
                     {
-                        type: 'score',
-                        sport: 'MLB',
-                        team1: 'KC',
-                        team2: 'BAL',
-                        score1: 2,
-                        score2: 5,
-                        status: '6th',
-                        odds: 'BAL -140'
+                        type: 'news',
+                        content: 'MLS All-Star Game voting now open - Messi leads early results',
+                        breaking: false
                     },
                     {
-                        type: 'news',
-                        content: '15 MLB games scheduled for Independence Day festivities',
-                        breaking: false
+                        type: 'score',
+                        sport: 'MLS',
+                        team1: 'TOR',
+                        team2: 'MTL',
+                        score1: 0,
+                        score2: 2,
+                        status: '89th',
+                        odds: 'MTL +165'
+                    },
+                    {
+                        type: 'upcoming',
+                        sport: 'MLB',
+                        team1: 'DET',
+                        team2: 'LAA',
+                        startTime: '9:38 PM ET',
+                        odds: 'DET -120'
                     },
                     {
                         type: 'score',
@@ -442,14 +488,33 @@
                         odds: 'NYM -125'
                     },
                     {
-                        type: 'score',
+                        type: 'upcoming',
+                        sport: 'MLS',
+                        team1: 'CHI',
+                        team2: 'CLB',
+                        startTime: '8:30 PM ET',
+                        odds: 'CLB -120'
+                    },
+                    {
+                        type: 'upcoming',
                         sport: 'MLB',
-                        team1: 'SD',
-                        team2: 'PIT',
-                        score1: 7,
-                        score2: 1,
-                        status: '9th',
-                        odds: 'SD -110'
+                        team1: 'ARI',
+                        team2: 'PHI',
+                        startTime: '6:05 PM ET',
+                        odds: 'PHI -165'
+                    },
+                    {
+                        type: 'news',
+                        content: 'Inter Miami vs LAFC highlights MLS July 4th schedule',
+                        breaking: false
+                    },
+                    {
+                        type: 'upcoming',
+                        sport: 'MLB',
+                        team1: 'CHC',
+                        team2: 'MIL',
+                        startTime: '7:10 PM ET',
+                        odds: 'MIL -130'
                     },
                     {
                         type: 'news',
@@ -465,9 +530,19 @@
                 console.log('Rendering content:', data);
                 const contentHtml = data.map(item => {
                     if (item.type === 'score') {
+                        // Add sport emoji to badge
+                        let sportEmoji = '';
+                        switch(item.sport) {
+                            case 'MLB': sportEmoji = '⚾'; break;
+                            case 'NBA': sportEmoji = '🏀'; break;
+                            case 'NFL': sportEmoji = '🏈'; break;
+                            case 'NCAA': sportEmoji = '🏀'; break;
+                            case 'MLS': sportEmoji = '⚽'; break;
+                            default: sportEmoji = '🏆'; break;
+                        }
                         return `
                             <div class="ticker-item">
-                                <span class="sport-badge ${item.sport.toLowerCase()}">${item.sport}</span>
+                                <span class="sport-badge ${item.sport.toLowerCase()}">${sportEmoji} ${item.sport}</span>
                                 <div class="score-display">
                                     <span class="team">${item.team1}</span>
                                     <span class="score">${item.score1}</span>
@@ -475,6 +550,29 @@
                                     <span class="team">${item.team2}</span>
                                     <span class="score">${item.score2}</span>
                                     <span class="time-status">${item.status}</span>
+                                    ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    } else if (item.type === 'upcoming') {
+                        // Add sport emoji to badge
+                        let sportEmoji = '';
+                        switch(item.sport) {
+                            case 'MLB': sportEmoji = '⚾'; break;
+                            case 'NBA': sportEmoji = '🏀'; break;
+                            case 'NFL': sportEmoji = '🏈'; break;
+                            case 'NCAA': sportEmoji = '🏀'; break;
+                            case 'MLS': sportEmoji = '⚽'; break;
+                            default: sportEmoji = '🏆'; break;
+                        }
+                        return `
+                            <div class="ticker-item">
+                                <span class="sport-badge ${item.sport.toLowerCase()}">${sportEmoji} ${item.sport}</span>
+                                <div class="score-display">
+                                    <span class="team">${item.team1}</span>
+                                    <span class="vs">@</span>
+                                    <span class="team">${item.team2}</span>
+                                    <span class="time-status">${item.startTime}</span>
                                     ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
                                 </div>
                             </div>
@@ -525,8 +623,8 @@
                     // Restart animation to ensure smooth looping
                     this.tickerContent.style.animation = 'none';
                     this.tickerContent.offsetHeight; // Trigger reflow
-                    this.tickerContent.style.animation = 'scroll 60s linear infinite';
-                }, 60000);
+                    this.tickerContent.style.animation = 'scroll 75s linear infinite';
+                }, 75000);
             }
         }
 
