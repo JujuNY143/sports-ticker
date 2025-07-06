@@ -16,8 +16,6 @@
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             height: 100vh;
-            margin: 0;
-            padding: 0;
         }
 
         .ticker-container {
@@ -48,7 +46,6 @@
             z-index: 1001;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
             min-width: 250px;
-            animation: headerPulse 4s ease-in-out infinite;
         }
 
         .live-sports-text {
@@ -59,11 +56,6 @@
         .brand-text {
             color: #ffffff;
             font-weight: bold;
-        }
-
-        @keyframes headerPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
         }
 
         .ticker-content {
@@ -107,6 +99,10 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
+        .sport-badge.mlb {
+            background: linear-gradient(135deg, #132448 0%, #bf0d3e 100%);
+        }
+
         .sport-badge.nba {
             background: linear-gradient(135deg, #c9082a 0%, #17408b 100%);
         }
@@ -115,25 +111,21 @@
             background: linear-gradient(135deg, #013369 0%, #d50a0a 100%);
         }
 
-        .sport-badge.mlb {
-            background: linear-gradient(135deg, #132448 0%, #bf0d3e 100%);
+        .sport-badge.mls {
+            background: linear-gradient(135deg, #005DAA 0%, #FF6900 100%);
         }
 
         .sport-badge.ncaa {
             background: linear-gradient(135deg, #ff8500 0%, #232d4b 100%);
         }
 
-        .sport-badge.mls {
-            background: linear-gradient(135deg, #005DAA 0%, #FF6900 100%);
-        }
-
         .score-display {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 6px 12px;
-            border-radius: 15px;
+            padding: 8px 16px;
+            border-radius: 18px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -151,6 +143,18 @@
         .vs {
             color: #a0a0a0;
             font-size: 12px;
+        }
+
+        .time-status {
+            color: #fbbf24;
+            font-size: 16px;
+            margin-left: 8px;
+        }
+
+        .odds {
+            color: #22c55e;
+            font-weight: bold;
+            margin-left: 8px;
         }
 
         .news-item {
@@ -181,116 +185,29 @@
             }
         }
 
-        .odds {
-            color: #22c55e;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-
-        .time-status {
-            color: #fbbf24;
-            font-size: 16px;
-            margin-left: 8px;
-        }
-
         .separator {
             color: #ffd60a;
             margin: 0 12px;
             font-size: 22px;
         }
 
-        /* Keep people watching - add engaging elements */
-        .ticker-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #ffd60a 0%, #ff6b35 25%, #ffd60a 50%, #ff6b35 75%, #ffd60a 100%);
-            animation: shimmer 3s linear infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .ticker-container::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, #ffd60a 50%, transparent 100%);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        /* Score displays with hover-like effects */
-        .score-display {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 18px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: scoreGlow 6s ease-in-out infinite;
-        }
-
-        @keyframes scoreGlow {
-            0%, 100% { 
-                box-shadow: 0 0 5px rgba(255, 214, 10, 0.3);
-            }
-            50% { 
-                box-shadow: 0 0 15px rgba(255, 214, 10, 0.6);
-            }
-        }
-        @media (max-width: 768px) {
-            .ticker-container {
-                height: 60px;
-            }
-            
-            .ticker-header {
-                min-width: 120px;
-                font-size: 12px;
-                padding: 0 10px;
-            }
-            
-            .ticker-content {
-                left: 120px;
-            }
-            
-            .ticker-item {
-                font-size: 14px;
-                margin-right: 30px;
-            }
-        }
-
-        /* Holiday/Off-season styling */
-        .holiday-mode {
-            background: linear-gradient(90deg, #1a365d 0%, #2d3748 50%, #1a365d 100%);
-        }
-
-        .holiday-mode .ticker-header {
-            background: linear-gradient(135deg, #4299e1 0%, #2b6cb0 100%);
+        .loading {
+            color: #fbbf24;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="ticker-container" id="tickerContainer">
+    <div class="ticker-container">
         <div class="ticker-header">
-            <div id="headerText"><span class="live-sports-text">LIVE SPORTS</span> • <span class="brand-text">The Bench Warmers</span></div>
+            <div><span class="live-sports-text">LIVE SPORTS</span> • <span class="brand-text">The Bench Warmers</span></div>
         </div>
         <div class="ticker-content" id="tickerContent">
-            <!-- Content will be populated by JavaScript -->
+            <div class="ticker-item">
+                <div class="news-item loading">
+                    <span>Loading ESPN API data...</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -298,251 +215,289 @@
         class SportsTicker {
             constructor() {
                 this.tickerContent = document.getElementById('tickerContent');
-                this.headerText = document.getElementById('headerText');
-                this.tickerContainer = document.getElementById('tickerContainer');
-                this.currentContent = '';
-                this.isHolidayMode = false;
-                
                 this.init();
             }
 
             init() {
-                this.updateContent();
-                setInterval(() => this.updateContent(), 300000); // Update every 5 minutes
-                this.startTicker();
+                console.log('Starting TheSportsDB API ticker...');
+                this.loadSportsDBData();
+                // Update every 5 minutes
+                setInterval(() => this.loadSportsDBData(), 300000);
             }
 
-            isHoliday() {
-                const today = new Date();
-                const month = today.getMonth() + 1;
-                const date = today.getDate();
-                
-                // Check for major holidays when sports typically don't play
-                const holidays = [
-                    { month: 12, date: 25 }, // Christmas
-                    { month: 1, date: 1 },   // New Year's Day
-                    { month: 7, date: 4 },   // Independence Day
-                    { month: 11, date: 28 }, // Thanksgiving (approximate)
-                ];
-                
-                return holidays.some(holiday => 
-                    holiday.month === month && holiday.date === date
-                );
-            }
-
-            async updateContent() {
+            async fetchSportsDBData(league) {
                 try {
-                    // Force display of live scores immediately
-                    console.log('Updating ticker content...');
-                    const sportsData = await this.getSportsData();
-                    console.log('Sports data loaded:', sportsData);
-                    this.renderContent(sportsData);
+                    // Your TheSportsDB Premium API Key
+                    const apiKey = '813745';
+                    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+                    
+                    // Get today's events for the league
+                    const apiUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/eventsday.php?d=${today}&l=${league}`;
+                    console.log(`Fetching TheSportsDB: ${apiUrl}`);
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    return data;
                 } catch (error) {
-                    console.error('Error updating content:', error);
-                    this.loadFallbackContent();
+                    console.error(`TheSportsDB API Error (${league}):`, error);
+                    return null;
                 }
             }
 
-            setHolidayMode() {
-                this.tickerContainer.classList.add('holiday-mode');
-                this.headerText.innerHTML = '<span class="live-sports-text">HOLIDAY MODE</span> • <span class="brand-text">The Bench Warmers</span>';
-                
-                const holidayContent = [
-                    { type: 'news', content: 'Happy Holidays from The Bench Warmers!' },
-                    { type: 'news', content: 'Sports resume soon - Stay tuned for live updates' },
-                    { type: 'news', content: 'Follow The Bench Warmers for the latest sports analysis' },
-                    { type: 'news', content: 'Off-season trades and signings coming up' },
-                ];
-                
-                this.renderContent(holidayContent);
+            async fetchSportsDBNews() {
+                try {
+                    const apiKey = '813745';
+                    // Get latest sports news
+                    const apiUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/latestnews.php`;
+                    console.log(`Fetching TheSportsDB News: ${apiUrl}`);
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error(`TheSportsDB News API Error:`, error);
+                    return null;
+                }
             }
 
-            async loadSportsData() {
-                // Simulate API calls - In production, replace with actual sports APIs
-                const sportsData = await this.getSportsData();
-                this.renderContent(sportsData);
+            async fetchLiveScores() {
+                try {
+                    // Use V2 API for live scores (no key needed for this endpoint)
+                    const apiUrl = `https://www.thesportsdb.com/api/v2/json/livescore/soccer`;
+                    console.log(`Fetching Live MLS Scores: ${apiUrl}`);
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error(`TheSportsDB Live Scores Error:`, error);
+                    return null;
+                }
             }
 
-            async getSportsData() {
-                // Force live game display with actual current scores and upcoming games
-                const currentHour = new Date().getHours();
+            parseSportsDBEvents(sportsData, sportName, leagueId) {
+                if (!sportsData || !sportsData.events) return [];
                 
-                // Always show live scores and upcoming games for July 4th (major sports day)
-                let data = [
-                    {
-                        type: 'score',
-                        sport: 'MLB',
-                        team1: 'TB',
-                        team2: 'NYY',
-                        score1: 3,
-                        score2: 7,
-                        status: 'FINAL',
-                        odds: 'NYY -165'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLS',
-                        team1: 'LAFC',
-                        team2: 'LAG',
-                        startTime: '10:30 PM ET',
-                        odds: 'LAFC -130'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLB',
-                        team1: 'MIN',
-                        team2: 'BOS',
-                        startTime: '4:10 PM ET',
-                        odds: 'BOS -140'
-                    },
-                    {
-                        type: 'score',
-                        sport: 'MLS',
-                        team1: 'ATL',
-                        team2: 'MIA',
-                        score1: 2,
-                        score2: 1,
-                        status: '78th',
-                        odds: 'ATL -115'
-                    },
-                    {
-                        type: 'news',
-                        content: 'Yankees dominate Rays 7-3 in July 4th matchup',
-                        breaking: true
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLB',
-                        team1: 'KC',
-                        team2: 'BAL',
-                        startTime: '7:15 PM ET',
-                        odds: 'BAL -135'
-                    },
-                    {
-                        type: 'score',
-                        sport: 'MLS',
-                        team1: 'SEA',
-                        team2: 'POR',
-                        score1: 1,
-                        score2: 3,
-                        status: 'FINAL',
-                        odds: 'POR +140'
-                    },
-                    {
-                        type: 'score',
-                        sport: 'MLB',
-                        team1: 'HOU',
-                        team2: 'CHW',
-                        score1: 8,
-                        score2: 2,
-                        status: '7th',
-                        odds: 'HOU -180'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLS',
-                        team1: 'NYC',
-                        team2: 'PHI',
-                        startTime: '7:30 PM ET',
-                        odds: 'NYC -105'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLB',
-                        team1: 'LAD',
-                        team2: 'ATL',
-                        startTime: '7:15 PM ET',
-                        odds: 'LAD -155'
-                    },
-                    {
-                        type: 'news',
-                        content: 'MLS All-Star Game voting now open - Messi leads early results',
-                        breaking: false
-                    },
-                    {
-                        type: 'score',
-                        sport: 'MLS',
-                        team1: 'TOR',
-                        team2: 'MTL',
-                        score1: 0,
-                        score2: 2,
-                        status: '89th',
-                        odds: 'MTL +165'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLB',
-                        team1: 'DET',
-                        team2: 'LAA',
-                        startTime: '9:38 PM ET',
-                        odds: 'DET -120'
-                    },
-                    {
-                        type: 'score',
-                        sport: 'MLB',
-                        team1: 'NYM',
-                        team2: 'STL',
-                        score1: 9,
-                        score2: 3,
-                        status: 'FINAL',
-                        odds: 'NYM -125'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLS',
-                        team1: 'CHI',
-                        team2: 'CLB',
-                        startTime: '8:30 PM ET',
-                        odds: 'CLB -120'
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLB',
-                        team1: 'ARI',
-                        team2: 'PHI',
-                        startTime: '6:05 PM ET',
-                        odds: 'PHI -165'
-                    },
-                    {
-                        type: 'news',
-                        content: 'Inter Miami vs LAFC highlights MLS July 4th schedule',
-                        breaking: false
-                    },
-                    {
-                        type: 'upcoming',
-                        sport: 'MLB',
-                        team1: 'CHC',
-                        team2: 'MIL',
-                        startTime: '7:10 PM ET',
-                        odds: 'MIL -130'
-                    },
-                    {
-                        type: 'news',
-                        content: 'Follow The Bench Warmers for live betting analysis',
-                        breaking: false
+                const games = [];
+                const today = new Date().toDateString();
+                
+                sportsData.events.forEach(event => {
+                    const gameDate = new Date(event.dateEvent);
+                    
+                    // Only include today's games
+                    if (gameDate.toDateString() === today) {
+                        // Parse team names/abbreviations
+                        const homeTeam = event.strHomeTeam;
+                        const awayTeam = event.strAwayTeam;
+                        
+                        // Get scores
+                        const homeScore = event.intHomeScore || '0';
+                        const awayScore = event.intAwayScore || '0';
+                        
+                        // Determine game status
+                        let gameStatus = 'Scheduled';
+                        let gameType = 'upcoming';
+                        
+                        if (event.strStatus === 'Match Finished') {
+                            gameStatus = 'FINAL';
+                            gameType = 'score';
+                        } else if (event.strStatus === 'In Play') {
+                            gameStatus = event.strProgress || 'LIVE';
+                            gameType = 'score';
+                        } else if (event.strTime) {
+                            // Format start time
+                            gameStatus = event.strTime + ' ET';
+                        }
+                        
+                        // Get sport emoji and abbreviations
+                        let sportEmoji = '';
+                        let team1Abbr = '';
+                        let team2Abbr = '';
+                        
+                        switch(sportName) {
+                            case 'MLB': 
+                                sportEmoji = '⚾'; 
+                                team1Abbr = this.getMLBTeamAbbr(awayTeam);
+                                team2Abbr = this.getMLBTeamAbbr(homeTeam);
+                                break;
+                            case 'MLS': 
+                                sportEmoji = '⚽'; 
+                                team1Abbr = this.getMLSTeamAbbr(awayTeam);
+                                team2Abbr = this.getMLSTeamAbbr(homeTeam);
+                                break;
+                            case 'NBA': 
+                                sportEmoji = '🏀';
+                                team1Abbr = this.getNBATeamAbbr(awayTeam);
+                                team2Abbr = this.getNBATeamAbbr(homeTeam);
+                                break;
+                            case 'NFL': 
+                                sportEmoji = '🏈';
+                                team1Abbr = this.getNFLTeamAbbr(awayTeam);
+                                team2Abbr = this.getNFLTeamAbbr(homeTeam);
+                                break;
+                            default: 
+                                sportEmoji = '🏆';
+                                team1Abbr = awayTeam?.substring(0, 3).toUpperCase() || 'TBD';
+                                team2Abbr = homeTeam?.substring(0, 3).toUpperCase() || 'TBD';
+                                break;
+                        }
+                        
+                        const gameData = {
+                            type: gameType,
+                            sport: sportName,
+                            emoji: sportEmoji,
+                            team1: team1Abbr,
+                            team2: team2Abbr,
+                            score1: parseInt(awayScore),
+                            score2: parseInt(homeScore),
+                            status: gameStatus
+                        };
+                        
+                        games.push(gameData);
                     }
-                ];
+                });
                 
-                return data;
+                return games;
+            }
+
+            // Helper functions for team abbreviations
+            getMLBTeamAbbr(teamName) {
+                const mlbTeams = {
+                    'Boston Red Sox': 'BOS', 'New York Yankees': 'NYY', 'Toronto Blue Jays': 'TOR',
+                    'Baltimore Orioles': 'BAL', 'Tampa Bay Rays': 'TB', 'Houston Astros': 'HOU',
+                    'Oakland Athletics': 'OAK', 'Seattle Mariners': 'SEA', 'Los Angeles Angels': 'LAA',
+                    'Texas Rangers': 'TEX', 'Kansas City Royals': 'KC', 'Minnesota Twins': 'MIN',
+                    'Cleveland Guardians': 'CLE', 'Detroit Tigers': 'DET', 'Chicago White Sox': 'CWS',
+                    'Los Angeles Dodgers': 'LAD', 'San Diego Padres': 'SD', 'San Francisco Giants': 'SF',
+                    'Colorado Rockies': 'COL', 'Arizona Diamondbacks': 'ARI', 'Atlanta Braves': 'ATL',
+                    'Miami Marlins': 'MIA', 'New York Mets': 'NYM', 'Philadelphia Phillies': 'PHI',
+                    'Washington Nationals': 'WSH', 'Milwaukee Brewers': 'MIL', 'Chicago Cubs': 'CHC',
+                    'Cincinnati Reds': 'CIN', 'Pittsburgh Pirates': 'PIT', 'St. Louis Cardinals': 'STL'
+                };
+                return mlbTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
+            }
+
+            getMLSTeamAbbr(teamName) {
+                const mlsTeams = {
+                    'Los Angeles FC': 'LAFC', 'LA Galaxy': 'LAG', 'Seattle Sounders': 'SEA',
+                    'Portland Timbers': 'POR', 'Atlanta United': 'ATL', 'Inter Miami': 'MIA',
+                    'New York City FC': 'NYC', 'New York Red Bulls': 'NYRB', 'Philadelphia Union': 'PHI',
+                    'Toronto FC': 'TOR', 'Montreal Impact': 'MTL', 'Columbus Crew': 'CLB',
+                    'Chicago Fire': 'CHI', 'FC Cincinnati': 'CIN', 'Nashville SC': 'NSH'
+                };
+                return mlsTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
+            }
+
+            getNBATeamAbbr(teamName) {
+                const nbaTeams = {
+                    'Los Angeles Lakers': 'LAL', 'Golden State Warriors': 'GSW', 'Boston Celtics': 'BOS',
+                    'Miami Heat': 'MIA', 'Chicago Bulls': 'CHI', 'New York Knicks': 'NYK'
+                };
+                return nbaTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
+            }
+
+            getNFLTeamAbbr(teamName) {
+                const nflTeams = {
+                    'Kansas City Chiefs': 'KC', 'Buffalo Bills': 'BUF', 'Dallas Cowboys': 'DAL',
+                    'Philadelphia Eagles': 'PHI', 'Green Bay Packers': 'GB', 'New England Patriots': 'NE'
+                };
+                return nflTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
+            }
+
+            async loadSportsDBData() {
+                console.log('Loading TheSportsDB data with API Key 813745...');
+                let allContent = [];
+                
+                try {
+                    // TheSportsDB League IDs for major US sports
+                    const leagues = [
+                        { id: '4424', name: 'MLB', sport: 'MLB' },      // Major League Baseball
+                        { id: '4346', name: 'MLS', sport: 'MLS' }       // Major League Soccer (current season)
+                    ];
+                    
+                    // Load data for current season leagues only
+                    for (const league of leagues) {
+                        const leagueData = await this.fetchSportsDBData(league.id);
+                        if (leagueData && leagueData.events) {
+                            const games = this.parseSportsDBEvents(leagueData, league.sport, league.id);
+                            allContent.push(...games);
+                            console.log(`Loaded ${games.length} ${league.sport} games from TheSportsDB`);
+                        } else {
+                            console.log(`No games found for ${league.sport} today`);
+                        }
+                    }
+                    
+                    // Get live MLS scores using V2 API
+                    const liveScores = await this.fetchLiveScores();
+                    if (liveScores && liveScores.events) {
+                        console.log(`Found ${liveScores.events.length} live soccer matches`);
+                        // Parse live scores if they're MLS games
+                        liveScores.events.forEach(event => {
+                            if (event.strLeague && event.strLeague.includes('MLS')) {
+                                allContent.push({
+                                    type: 'score',
+                                    sport: 'MLS',
+                                    emoji: '⚽',
+                                    team1: event.strHomeTeam?.substring(0, 3).toUpperCase() || 'HOME',
+                                    team2: event.strAwayTeam?.substring(0, 3).toUpperCase() || 'AWAY',
+                                    score1: parseInt(event.intHomeScore) || 0,
+                                    score2: parseInt(event.intAwayScore) || 0,
+                                    status: event.strProgress || 'LIVE'
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Load sports news
+                    const newsData = await this.fetchSportsDBNews();
+                    if (newsData && newsData.articles) {
+                        const newsItems = newsData.articles.slice(0, 3).map(article => ({
+                            type: 'news',
+                            content: article.strHeadline || article.strNews || 'Sports news update',
+                            breaking: false
+                        }));
+                        allContent.push(...newsItems);
+                        console.log(`Loaded ${newsItems.length} news stories from TheSportsDB`);
+                    }
+                    
+                    // If no real content, add placeholder
+                    if (allContent.length === 0) {
+                        allContent.push({
+                            type: 'news',
+                            content: 'Checking for live games and breaking sports news...'
+                        });
+                    }
+                    
+                    // Add branded content
+                    allContent.push({
+                        type: 'news',
+                        content: 'Follow The Bench Warmers for live sports betting analysis'
+                    });
+                    
+                } catch (error) {
+                    console.error('TheSportsDB loading error:', error);
+                    allContent = [
+                        {
+                            type: 'news',
+                            content: 'Loading live sports data and breaking news...'
+                        },
+                        {
+                            type: 'news',
+                            content: 'Follow The Bench Warmers for live sports updates'
+                        }
+                    ];
+                }
+                
+                console.log(`Total content loaded: ${allContent.length} items`);
+                this.renderContent(allContent);
             }
 
             renderContent(data) {
-                console.log('Rendering content:', data);
                 const contentHtml = data.map(item => {
                     if (item.type === 'score') {
-                        // Add sport emoji to badge
-                        let sportEmoji = '';
-                        switch(item.sport) {
-                            case 'MLB': sportEmoji = '⚾'; break;
-                            case 'NBA': sportEmoji = '🏀'; break;
-                            case 'NFL': sportEmoji = '🏈'; break;
-                            case 'NCAA': sportEmoji = '🏀'; break;
-                            case 'MLS': sportEmoji = '⚽'; break;
-                            default: sportEmoji = '🏆'; break;
-                        }
                         return `
                             <div class="ticker-item">
-                                <span class="sport-badge ${item.sport.toLowerCase()}">${sportEmoji} ${item.sport}</span>
+                                <span class="sport-badge ${item.sport.toLowerCase()}">${item.emoji} ${item.sport}</span>
                                 <div class="score-display">
                                     <span class="team">${item.team1}</span>
                                     <span class="score">${item.score1}</span>
@@ -550,30 +505,18 @@
                                     <span class="team">${item.team2}</span>
                                     <span class="score">${item.score2}</span>
                                     <span class="time-status">${item.status}</span>
-                                    ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
                                 </div>
                             </div>
                         `;
                     } else if (item.type === 'upcoming') {
-                        // Add sport emoji to badge
-                        let sportEmoji = '';
-                        switch(item.sport) {
-                            case 'MLB': sportEmoji = '⚾'; break;
-                            case 'NBA': sportEmoji = '🏀'; break;
-                            case 'NFL': sportEmoji = '🏈'; break;
-                            case 'NCAA': sportEmoji = '🏀'; break;
-                            case 'MLS': sportEmoji = '⚽'; break;
-                            default: sportEmoji = '🏆'; break;
-                        }
                         return `
                             <div class="ticker-item">
-                                <span class="sport-badge ${item.sport.toLowerCase()}">${sportEmoji} ${item.sport}</span>
+                                <span class="sport-badge ${item.sport.toLowerCase()}">${item.emoji} ${item.sport}</span>
                                 <div class="score-display">
                                     <span class="team">${item.team1}</span>
                                     <span class="vs">@</span>
                                     <span class="team">${item.team2}</span>
-                                    <span class="time-status">${item.startTime}</span>
-                                    ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
+                                    <span class="time-status">${item.status}</span>
                                 </div>
                             </div>
                         `;
@@ -581,7 +524,6 @@
                         return `
                             <div class="ticker-item">
                                 <div class="news-item">
-                                    ${item.breaking ? '<span class="breaking">BREAKING</span>' : ''}
                                     <span>${item.content}</span>
                                 </div>
                             </div>
@@ -590,58 +532,14 @@
                     return '';
                 }).join('<span class="separator">•</span>');
                 
-                console.log('Generated HTML:', contentHtml);
                 this.tickerContent.innerHTML = contentHtml;
-            }
-
-            loadFallbackContent() {
-                const fallbackData = [
-                    {
-                        type: 'news',
-                        content: 'Welcome to The Bench Warmers - Your source for sports analysis',
-                        breaking: false
-                    },
-                    {
-                        type: 'news',
-                        content: 'Live sports updates and betting insights coming soon',
-                        breaking: false
-                    },
-                    {
-                        type: 'news',
-                        content: 'Follow The Bench Warmers for the latest sports content',
-                        breaking: false
-                    }
-                ];
-                
-                this.renderContent(fallbackData);
-            }
-
-            startTicker() {
-                // The ticker animation is handled by CSS
-                // This method can be used for additional ticker controls if needed
-                setInterval(() => {
-                    // Restart animation to ensure smooth looping
-                    this.tickerContent.style.animation = 'none';
-                    this.tickerContent.offsetHeight; // Trigger reflow
-                    this.tickerContent.style.animation = 'scroll 75s linear infinite';
-                }, 75000);
+                console.log('Content rendered to ticker');
             }
         }
 
-        // Initialize the ticker when the page loads
+        // Start the ticker
         document.addEventListener('DOMContentLoaded', () => {
             new SportsTicker();
-        });
-
-        // Handle visibility changes for OBS/Streamlabs compatibility
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // Pause animations when not visible to save resources
-                document.getElementById('tickerContent').style.animationPlayState = 'paused';
-            } else {
-                // Resume animations when visible
-                document.getElementById('tickerContent').style.animationPlayState = 'running';
-            }
         });
     </script>
 </body>
