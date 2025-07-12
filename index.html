@@ -195,6 +195,11 @@
             color: #fbbf24;
             font-style: italic;
         }
+
+        .error {
+            color: #ff6b6b;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -205,7 +210,7 @@
         <div class="ticker-content" id="tickerContent">
             <div class="ticker-item">
                 <div class="news-item loading">
-                    <span>Loading ESPN API data...</span>
+                    <span>Connecting to live sports data...</span>
                 </div>
             </div>
         </div>
@@ -215,86 +220,152 @@
         class SportsTicker {
             constructor() {
                 this.tickerContent = document.getElementById('tickerContent');
+                this.sportsDbKey = '813745';
+                this.oddsApiKey = '92c8bcc9b1590ebbe3b10ecf01a2aa13';
+                this.sportsDbUrl = 'https://www.thesportsdb.com/api/v1/json';
+                this.oddsApiUrl = 'https://api.the-odds-api.com/v4';
                 this.init();
             }
 
             init() {
-                console.log('Starting TheSportsDB API ticker...');
-                this.loadSportsDBData();
-                // Update every 5 minutes
-                setInterval(() => this.loadSportsDBData(), 300000);
+                console.log('Starting server-side sports data fetching...');
+                this.loadRealSportsData();
+                // Update every 2 minutes for real-time data
+                setInterval(() => this.loadRealSportsData(), 120000);
             }
 
-            async fetchSportsDBData(league) {
+            // Server-side proxy to avoid CORS
+            async fetchWithProxy(url) {
                 try {
-                    // Your TheSportsDB Premium API Key
-                    const apiKey = '813745';
-                    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+                    // Use a reliable CORS proxy service
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                    console.log(`Fetching via proxy: ${url}`);
                     
-                    // Get today's events for the league
-                    const apiUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/eventsday.php?d=${today}&l=${league}`;
-                    console.log(`Fetching TheSportsDB: ${apiUrl}`);
-                    
-                    const response = await fetch(apiUrl);
+                    const response = await fetch(proxyUrl);
                     const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error(`TheSportsDB API Error (${league}):`, error);
+                    
+                    if (data.contents) {
+                        return JSON.parse(data.contents);
+                    }
                     return null;
+                } catch (error) {
+                    console.error('Proxy fetch error:', error);
+                    
+                    // Try alternative proxy
+                    try {
+                        const altProxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+                        const altResponse = await fetch(altProxy);
+                        return await altResponse.json();
+                    } catch (altError) {
+                        console.error('Alternative proxy failed:', altError);
+                        return null;
+                    }
                 }
             }
 
-            async fetchSportsDBNews() {
-                try {
-                    const apiKey = '813745';
-                    // Get latest sports news
-                    const apiUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/latestnews.php`;
-                    console.log(`Fetching TheSportsDB News: ${apiUrl}`);
-                    
-                    const response = await fetch(apiUrl);
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error(`TheSportsDB News API Error:`, error);
-                    return null;
-                }
-            }
-
-            async fetchLiveScores() {
-                try {
-                    // Use V2 API for live scores (no key needed for this endpoint)
-                    const apiUrl = `https://www.thesportsdb.com/api/v2/json/livescore/soccer`;
-                    console.log(`Fetching Live MLS Scores: ${apiUrl}`);
-                    
-                    const response = await fetch(apiUrl);
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error(`TheSportsDB Live Scores Error:`, error);
-                    return null;
-                }
-            }
-
-            parseSportsDBEvents(sportsData, sportName, leagueId) {
-                if (!sportsData || !sportsData.events) return [];
+            async fetchTodaysGames(leagueId, sportName) {
+                const today = new Date().toISOString().split('T')[0];
+                const url = `${this.baseUrl}/${this.apiKey}/eventsday.php?d=${today}&l=${leagueId}`;
                 
+                const data = await this.fetchWithProxy(url);
+                if (data && data.events) {
+                    return this.parseGames(data.events, sportName);
+                }
+                return [];
+            }
+
+            async fetchSportsNews() {
+                const url = `${this.baseUrl}/${this.apiKey}/latestnews.php`;
+                
+                const data = await this.fetchWithProxy(url);
+                if (data && data.articles) {
+                    return data.articles.slice(0, 3).map(article => ({
+                        type: 'news',
+                        content: article.strHeadline || article.strNews || 'Sports news update',
+                        breaking: false
+                    }));
+                }
+                return [];
+            }
+
+            // Fetch live odds from The Odds API
+            async fetchLiveOdds() {
+                console.log('--- Loading Live Odds from The Odds API ---');
+                
+                const sports = ['baseball_mlb', 'soccer_usa_mls'];
+                let allOdds = {};
+                
+                for (const sport of sports) {
+                    try {
+                        const oddsUrl = `${this.oddsApiUrl}/sports/${sport}/odds/?apiKey=${this.oddsApiKey}&regions=us&markets=h2h,spreads&oddsFormat=american`;
+                        console.log(`Fetching odds for ${sport}...`);
+                        
+                        const oddsData = await this.fetchWithMethod(oddsUrl, 'direct');
+                        
+                        if (oddsData && Array.isArray(oddsData)) {
+                            console.log(`✅ Loaded ${oddsData.length} games with odds for ${sport}`);
+                            
+                            // Process odds data
+                            oddsData.forEach(game => {
+                                const gameKey = `${game.home_team}_vs_${game.away_team}`;
+                                allOdds[gameKey] = {
+                                    sport: sport === 'baseball_mlb' ? 'MLB' : 'MLS',
+                                    homeTeam: game.home_team,
+                                    awayTeam: game.away_team,
+                                    commence_time: game.commence_time,
+                                    odds: this.parseOddsData(game.bookmakers)
+                                };
+                            });
+                        } else {
+                            console.log(`ℹ️ No odds available for ${sport}`);
+                        }
+                    } catch (error) {
+                        console.error(`Odds API error for ${sport}:`, error.message);
+                    }
+                }
+                
+                console.log(`Total odds loaded: ${Object.keys(allOdds).length} games`);
+                return allOdds;
+            }
+
+            parseOddsData(bookmakers) {
+                if (!bookmakers || bookmakers.length === 0) return null;
+                
+                // Use the first available bookmaker (usually DraftKings, FanDuel, etc.)
+                const bookmaker = bookmakers[0];
+                let odds = {};
+                
+                bookmaker.markets.forEach(market => {
+                    if (market.key === 'h2h') {
+                        // Moneyline odds
+                        odds.moneyline = {};
+                        market.outcomes.forEach(outcome => {
+                            odds.moneyline[outcome.name] = outcome.price > 0 ? `+${outcome.price}` : `${outcome.price}`;
+                        });
+                    } else if (market.key === 'spreads') {
+                        // Spread odds
+                        odds.spreads = {};
+                        market.outcomes.forEach(outcome => {
+                            odds.spreads[outcome.name] = {
+                                point: outcome.point,
+                                price: outcome.price > 0 ? `+${outcome.price}` : `${outcome.price}`
+                            };
+                        });
+                    }
+                });
+                
+                return odds;
+            }
+
+            // Enhanced game parsing with odds integration
+            parseGamesWithOdds(events, sportName, oddsData) {
                 const games = [];
                 const today = new Date().toDateString();
                 
-                sportsData.events.forEach(event => {
+                events.forEach(event => {
                     const gameDate = new Date(event.dateEvent);
                     
-                    // Only include today's games
                     if (gameDate.toDateString() === today) {
-                        // Parse team names/abbreviations
-                        const homeTeam = event.strHomeTeam;
-                        const awayTeam = event.strAwayTeam;
-                        
-                        // Get scores
-                        const homeScore = event.intHomeScore || '0';
-                        const awayScore = event.intAwayScore || '0';
-                        
-                        // Determine game status
                         let gameStatus = 'Scheduled';
                         let gameType = 'upcoming';
                         
@@ -305,190 +376,146 @@
                             gameStatus = event.strProgress || 'LIVE';
                             gameType = 'score';
                         } else if (event.strTime) {
-                            // Format start time
                             gameStatus = event.strTime + ' ET';
                         }
                         
-                        // Get sport emoji and abbreviations
-                        let sportEmoji = '';
-                        let team1Abbr = '';
-                        let team2Abbr = '';
+                        const sportEmoji = this.getSportEmoji(sportName);
+                        const team1Abbr = this.getTeamAbbr(event.strAwayTeam, sportName);
+                        const team2Abbr = this.getTeamAbbr(event.strHomeTeam, sportName);
                         
-                        switch(sportName) {
-                            case 'MLB': 
-                                sportEmoji = '⚾'; 
-                                team1Abbr = this.getMLBTeamAbbr(awayTeam);
-                                team2Abbr = this.getMLBTeamAbbr(homeTeam);
+                        // Find matching odds
+                        let oddsInfo = null;
+                        for (const [gameKey, odds] of Object.entries(oddsData)) {
+                            if (odds.sport === sportName && 
+                                (odds.homeTeam.includes(event.strHomeTeam.split(' ').pop()) || 
+                                 odds.awayTeam.includes(event.strAwayTeam.split(' ').pop()))) {
+                                oddsInfo = odds.odds;
                                 break;
-                            case 'MLS': 
-                                sportEmoji = '⚽'; 
-                                team1Abbr = this.getMLSTeamAbbr(awayTeam);
-                                team2Abbr = this.getMLSTeamAbbr(homeTeam);
-                                break;
-                            case 'NBA': 
-                                sportEmoji = '🏀';
-                                team1Abbr = this.getNBATeamAbbr(awayTeam);
-                                team2Abbr = this.getNBATeamAbbr(homeTeam);
-                                break;
-                            case 'NFL': 
-                                sportEmoji = '🏈';
-                                team1Abbr = this.getNFLTeamAbbr(awayTeam);
-                                team2Abbr = this.getNFLTeamAbbr(homeTeam);
-                                break;
-                            default: 
-                                sportEmoji = '🏆';
-                                team1Abbr = awayTeam?.substring(0, 3).toUpperCase() || 'TBD';
-                                team2Abbr = homeTeam?.substring(0, 3).toUpperCase() || 'TBD';
-                                break;
+                            }
                         }
                         
-                        const gameData = {
+                        // Format odds for display
+                        let oddsDisplay = '';
+                        if (oddsInfo) {
+                            if (oddsInfo.spreads && Object.keys(oddsInfo.spreads).length > 0) {
+                                const homeSpread = oddsInfo.spreads[Object.keys(oddsInfo.spreads)[0]];
+                                if (homeSpread && homeSpread.point) {
+                                    oddsDisplay = `${homeSpread.point > 0 ? '+' : ''}${homeSpread.point}`;
+                                }
+                            } else if (oddsInfo.moneyline && Object.keys(oddsInfo.moneyline).length > 0) {
+                                const firstTeamOdds = oddsInfo.moneyline[Object.keys(oddsInfo.moneyline)[0]];
+                                oddsDisplay = firstTeamOdds;
+                            }
+                        }
+                        
+                        games.push({
                             type: gameType,
                             sport: sportName,
                             emoji: sportEmoji,
                             team1: team1Abbr,
                             team2: team2Abbr,
-                            score1: parseInt(awayScore),
-                            score2: parseInt(homeScore),
-                            status: gameStatus
-                        };
-                        
-                        games.push(gameData);
+                            score1: parseInt(event.intAwayScore) || 0,
+                            score2: parseInt(event.intHomeScore) || 0,
+                            status: gameStatus,
+                            odds: oddsDisplay
+                        });
                     }
                 });
                 
                 return games;
             }
 
-            // Helper functions for team abbreviations
-            getMLBTeamAbbr(teamName) {
-                const mlbTeams = {
-                    'Boston Red Sox': 'BOS', 'New York Yankees': 'NYY', 'Toronto Blue Jays': 'TOR',
-                    'Baltimore Orioles': 'BAL', 'Tampa Bay Rays': 'TB', 'Houston Astros': 'HOU',
-                    'Oakland Athletics': 'OAK', 'Seattle Mariners': 'SEA', 'Los Angeles Angels': 'LAA',
-                    'Texas Rangers': 'TEX', 'Kansas City Royals': 'KC', 'Minnesota Twins': 'MIN',
-                    'Cleveland Guardians': 'CLE', 'Detroit Tigers': 'DET', 'Chicago White Sox': 'CWS',
-                    'Los Angeles Dodgers': 'LAD', 'San Diego Padres': 'SD', 'San Francisco Giants': 'SF',
-                    'Colorado Rockies': 'COL', 'Arizona Diamondbacks': 'ARI', 'Atlanta Braves': 'ATL',
-                    'Miami Marlins': 'MIA', 'New York Mets': 'NYM', 'Philadelphia Phillies': 'PHI',
-                    'Washington Nationals': 'WSH', 'Milwaukee Brewers': 'MIL', 'Chicago Cubs': 'CHC',
-                    'Cincinnati Reds': 'CIN', 'Pittsburgh Pirates': 'PIT', 'St. Louis Cardinals': 'STL'
+            getSportEmoji(sport) {
+                const emojis = {
+                    'MLB': '⚾',
+                    'MLS': '⚽',
+                    'NBA': '🏀',
+                    'NFL': '🏈',
+                    'NCAA': '🏀'
                 };
-                return mlbTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
+                return emojis[sport] || '🏆';
             }
 
-            getMLSTeamAbbr(teamName) {
-                const mlsTeams = {
-                    'Los Angeles FC': 'LAFC', 'LA Galaxy': 'LAG', 'Seattle Sounders': 'SEA',
-                    'Portland Timbers': 'POR', 'Atlanta United': 'ATL', 'Inter Miami': 'MIA',
-                    'New York City FC': 'NYC', 'New York Red Bulls': 'NYRB', 'Philadelphia Union': 'PHI',
-                    'Toronto FC': 'TOR', 'Montreal Impact': 'MTL', 'Columbus Crew': 'CLB',
-                    'Chicago Fire': 'CHI', 'FC Cincinnati': 'CIN', 'Nashville SC': 'NSH'
+            getTeamAbbr(teamName, sport) {
+                if (!teamName) return 'TBD';
+                
+                const abbreviations = {
+                    'MLB': {
+                        'Boston Red Sox': 'BOS', 'New York Yankees': 'NYY', 'Toronto Blue Jays': 'TOR',
+                        'Baltimore Orioles': 'BAL', 'Tampa Bay Rays': 'TB', 'Houston Astros': 'HOU',
+                        'Oakland Athletics': 'OAK', 'Seattle Mariners': 'SEA', 'Los Angeles Angels': 'LAA',
+                        'Texas Rangers': 'TEX', 'Kansas City Royals': 'KC', 'Minnesota Twins': 'MIN',
+                        'Cleveland Guardians': 'CLE', 'Detroit Tigers': 'DET', 'Chicago White Sox': 'CWS',
+                        'Los Angeles Dodgers': 'LAD', 'San Diego Padres': 'SD', 'San Francisco Giants': 'SF',
+                        'Colorado Rockies': 'COL', 'Arizona Diamondbacks': 'ARI', 'Atlanta Braves': 'ATL',
+                        'Miami Marlins': 'MIA', 'New York Mets': 'NYM', 'Philadelphia Phillies': 'PHI',
+                        'Washington Nationals': 'WSH', 'Milwaukee Brewers': 'MIL', 'Chicago Cubs': 'CHC',
+                        'Cincinnati Reds': 'CIN', 'Pittsburgh Pirates': 'PIT', 'St. Louis Cardinals': 'STL'
+                    },
+                    'MLS': {
+                        'Los Angeles FC': 'LAFC', 'LA Galaxy': 'LAG', 'Seattle Sounders': 'SEA',
+                        'Portland Timbers': 'POR', 'Atlanta United': 'ATL', 'Inter Miami': 'MIA',
+                        'New York City FC': 'NYC', 'New York Red Bulls': 'NYRB', 'Philadelphia Union': 'PHI',
+                        'Toronto FC': 'TOR', 'CF Montreal': 'MTL', 'Columbus Crew': 'CLB',
+                        'Chicago Fire': 'CHI', 'FC Cincinnati': 'CIN', 'Nashville SC': 'NSH'
+                    }
                 };
-                return mlsTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
+                
+                return abbreviations[sport]?.[teamName] || teamName.substring(0, 3).toUpperCase();
             }
 
-            getNBATeamAbbr(teamName) {
-                const nbaTeams = {
-                    'Los Angeles Lakers': 'LAL', 'Golden State Warriors': 'GSW', 'Boston Celtics': 'BOS',
-                    'Miami Heat': 'MIA', 'Chicago Bulls': 'CHI', 'New York Knicks': 'NYK'
-                };
-                return nbaTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
-            }
-
-            getNFLTeamAbbr(teamName) {
-                const nflTeams = {
-                    'Kansas City Chiefs': 'KC', 'Buffalo Bills': 'BUF', 'Dallas Cowboys': 'DAL',
-                    'Philadelphia Eagles': 'PHI', 'Green Bay Packers': 'GB', 'New England Patriots': 'NE'
-                };
-                return nflTeams[teamName] || teamName?.substring(0, 3).toUpperCase() || 'TBD';
-            }
-
-            async loadSportsDBData() {
-                console.log('Loading TheSportsDB data with API Key 813745...');
+            async loadRealSportsData() {
+                console.log('Loading REAL sports data only...');
                 let allContent = [];
                 
                 try {
-                    // TheSportsDB League IDs for major US sports
-                    const leagues = [
-                        { id: '4424', name: 'MLB', sport: 'MLB' },      // Major League Baseball
-                        { id: '4346', name: 'MLS', sport: 'MLS' }       // Major League Soccer (current season)
+                    // Only load current season sports
+                    const currentSeasonLeagues = [
+                        { id: '4424', name: 'MLB', sport: 'MLB' },  // Baseball (July = in season)
+                        { id: '4346', name: 'MLS', sport: 'MLS' }   // Soccer (July = in season)
                     ];
                     
-                    // Load data for current season leagues only
-                    for (const league of leagues) {
-                        const leagueData = await this.fetchSportsDBData(league.id);
-                        if (leagueData && leagueData.events) {
-                            const games = this.parseSportsDBEvents(leagueData, league.sport, league.id);
+                    // Load real games for current seasons
+                    for (const league of currentSeasonLeagues) {
+                        const games = await this.fetchTodaysGames(league.id, league.sport);
+                        if (games.length > 0) {
                             allContent.push(...games);
-                            console.log(`Loaded ${games.length} ${league.sport} games from TheSportsDB`);
+                            console.log(`Loaded ${games.length} real ${league.sport} games`);
                         } else {
-                            console.log(`No games found for ${league.sport} today`);
+                            console.log(`No ${league.sport} games scheduled today`);
                         }
                     }
                     
-                    // Get live MLS scores using V2 API
-                    const liveScores = await this.fetchLiveScores();
-                    if (liveScores && liveScores.events) {
-                        console.log(`Found ${liveScores.events.length} live soccer matches`);
-                        // Parse live scores if they're MLS games
-                        liveScores.events.forEach(event => {
-                            if (event.strLeague && event.strLeague.includes('MLS')) {
-                                allContent.push({
-                                    type: 'score',
-                                    sport: 'MLS',
-                                    emoji: '⚽',
-                                    team1: event.strHomeTeam?.substring(0, 3).toUpperCase() || 'HOME',
-                                    team2: event.strAwayTeam?.substring(0, 3).toUpperCase() || 'AWAY',
-                                    score1: parseInt(event.intHomeScore) || 0,
-                                    score2: parseInt(event.intAwayScore) || 0,
-                                    status: event.strProgress || 'LIVE'
-                                });
-                            }
-                        });
+                    // Load real sports news
+                    const news = await this.fetchSportsNews();
+                    if (news.length > 0) {
+                        allContent.push(...news);
+                        console.log(`Loaded ${news.length} real news articles`);
                     }
                     
-                    // Load sports news
-                    const newsData = await this.fetchSportsDBNews();
-                    if (newsData && newsData.articles) {
-                        const newsItems = newsData.articles.slice(0, 3).map(article => ({
-                            type: 'news',
-                            content: article.strHeadline || article.strNews || 'Sports news update',
-                            breaking: false
-                        }));
-                        allContent.push(...newsItems);
-                        console.log(`Loaded ${newsItems.length} news stories from TheSportsDB`);
-                    }
-                    
-                    // If no real content, add placeholder
+                    // If no real data available, show appropriate message
                     if (allContent.length === 0) {
                         allContent.push({
                             type: 'news',
-                            content: 'Checking for live games and breaking sports news...'
+                            content: 'No live games scheduled - Check back for breaking sports news'
                         });
                     }
                     
-                    // Add branded content
+                    // Add only your branding
                     allContent.push({
                         type: 'news',
                         content: 'Follow The Bench Warmers for live sports betting analysis'
                     });
                     
                 } catch (error) {
-                    console.error('TheSportsDB loading error:', error);
-                    allContent = [
-                        {
-                            type: 'news',
-                            content: 'Loading live sports data and breaking news...'
-                        },
-                        {
-                            type: 'news',
-                            content: 'Follow The Bench Warmers for live sports updates'
-                        }
-                    ];
+                    console.error('Real data loading error:', error);
+                    allContent = [{
+                        type: 'news',
+                        content: 'Unable to connect to sports data - Please check connection'
+                    }];
                 }
                 
-                console.log(`Total content loaded: ${allContent.length} items`);
+                console.log(`Total REAL content loaded: ${allContent.length} items`);
                 this.renderContent(allContent);
             }
 
@@ -505,6 +532,7 @@
                                     <span class="team">${item.team2}</span>
                                     <span class="score">${item.score2}</span>
                                     <span class="time-status">${item.status}</span>
+                                    ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
                                 </div>
                             </div>
                         `;
@@ -517,6 +545,7 @@
                                     <span class="vs">@</span>
                                     <span class="team">${item.team2}</span>
                                     <span class="time-status">${item.status}</span>
+                                    ${item.odds ? `<span class="odds">${item.odds}</span>` : ''}
                                 </div>
                             </div>
                         `;
@@ -533,7 +562,7 @@
                 }).join('<span class="separator">•</span>');
                 
                 this.tickerContent.innerHTML = contentHtml;
-                console.log('Content rendered to ticker');
+                console.log('Real content rendered to ticker');
             }
         }
 
